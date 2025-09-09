@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACM MPSTME - Student Registration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+ .logo {
+    width: 160px;   /* increased size */
+    height: 160px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo img {
+    width: 110%;    /* make it slightly bigger than container */
+    height: 110%;
+    object-fit: contain;
+    background: transparent;
+    filter: drop-shadow(0 0 0 #3498db) drop-shadow(0 0 2px #3498db);
+}
+
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .form-container {
+            padding: 30px 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e6ed;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #2980b9, #1e6091);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Flash messages */
+        .flash-messages {
+            padding: 0 20px;
+            margin-top: -10px;
+        }
+
+        .flash-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                margin-top: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px 15px;
+            }
+            
+            .logo {
+                width: 90px;
+                height: 90px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .form-container {
+                padding: 20px 15px;
+            }
+            
+            input, select, textarea {
+                padding: 12px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+        }
+
+        /* Loading state */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .loading .submit-btn {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="https://i.postimg.cc/JhL099dK/acm.png" alt="ACM Logo">
+            </div>
+            <h1>ACM Student Chapter</h1>
+            <p>MPSTME - SHIRPUR</p>
+        </div>
+
+        {% with messages = get_flashed_messages(category_filter=["error"]) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message flash-error">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="form-container">
+            <form id="studentForm" method="POST" action="/submit">
+                <div class="form-group">
+                    <label for="member_id">Member ID *</label>
+                    <input type="text" id="member_id" name="member_id" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="acm_email">ACM Email Address *</label>
+                    <input type="email" id="acm_email" name="acm_email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="roll">Roll Number *</label>
+                    <input type="text" id="roll" name="roll" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="sap">SAP ID *</label>
+                    <input type="text" id="sap" name="sap" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="year">Academic Year *</label>
+                    <select id="year" name="year" required>
+                        <option value="">Select Year</option>
+                        <option value="FE">First Year (FE)</option>
+                        <option value="SE">Second Year (SE)</option>
+                        <option value="TE">Third Year (TE)</option>
+                        <option value="BE">Final Year (BE)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="course">Course *</label>
+                    <select id="course" name="course" required onchange="toggleBranch()">
+                        <option value="">Select Course</option>
+                        <option value="B.Tech">B.Tech</option>
+                        <option value="MBA Tech">MBA Tech</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="branch-group" style="display: none;">
+                    <label for="branch">Branch *</label>
+                    <select id="branch" name="branch">
+                        <option value="">Select Branch</option>
+                        <option value="AIML">Artificial Intelligence & Machine Learning (AIML)</option>
+                        <option value="CE">Computer Engineering (CE)</option>
+                        <option value="CS">Computer Science (CS)</option>
+                        <option value="IT">Information Technology (IT)</option>
+                        <option value="CSDS">Computer Science & Data Science (CSDS)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="submit-btn">Submit Registration</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Toggle branch field based on course selection
+        function toggleBranch() {
+            const course = document.getElementById('course').value;
+            const branchGroup = document.getElementById('branch-group');
+            const branchSelect = document.getElementById('branch');
+            
+            if (course === 'B.Tech') {
+                branchGroup.style.display = 'block';
+                branchSelect.required = true;
+            } else {
+                branchGroup.style.display = 'none';
+                branchSelect.required = false;
+                branchSelect.value = '';
+            }
+        }
+
+        // Form submission handling
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
+            const course = document.getElementById('course').value;
+            const branch = document.getElementById('branch').value;
+            
+            // Validate branch requirement for B.Tech
+            if (course === 'B.Tech' && !branch) {
+                e.preventDefault();
+                alert('Please select a branch for B.Tech course.');
+                return false;
+            }
+            
+            const button = this.querySelector('.submit-btn');
+            const container = this.closest('.container');
+            
+            button.textContent = 'Submitting...';
+            container.classList.add('loading');
+        });
+
+        // Auto-hide flash messages after 5 seconds
+        setTimeout(function() {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function(message) {
+                message.style.transition = 'opacity 0.3s, transform 0.3s';
+                message.style.opacity = '0';
+                message.style.transform = 'translateY(-10px)';
+                setTimeout(function() {
+                    message.remove();
+                }, 300);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>
