@@ -10,7 +10,7 @@ import os
 from datetime import datetime
 import io
 import base64
-from weasyprint import HTML
+from xhtml2pdf import pisa
 
 class ACMBadgeGenerator:
     def __init__(self):
@@ -83,7 +83,7 @@ class ACMBadgeGenerator:
 
     def convert_html_to_pdf(self, html_content):
         """
-        Converts HTML content to PDF bytes.
+        Converts HTML content to PDF bytes using xhtml2pdf.
         
         Args:
             html_content (str): The HTML content to convert.
@@ -92,8 +92,24 @@ class ACMBadgeGenerator:
             bytes: The PDF content as bytes, or None if conversion fails.
         """
         try:
-            pdf_bytes = HTML(string=html_content).write_pdf()
+            # Create a BytesIO buffer to hold the PDF
+            pdf_buffer = io.BytesIO()
+            
+            # Convert HTML to PDF
+            pisa_status = pisa.CreatePDF(
+                src=io.BytesIO(html_content.encode('utf-8')),
+                dest=pdf_buffer
+            )
+            
+            # Check if conversion was successful
+            if pisa_status.err:
+                print(f"❌ Error converting HTML to PDF: pisa returned error code {pisa_status.err}")
+                return None
+            
+            # Get the PDF bytes
+            pdf_bytes = pdf_buffer.getvalue()
             return pdf_bytes
+            
         except Exception as e:
             print(f"❌ Error converting HTML to PDF: {e}")
             return None

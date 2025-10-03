@@ -8,4 +8,4 @@ Werkzeug==3.0.1
 gunicorn==21.2.0
 qrcode==7.4.2
 Pillow==10.4.0
-weasyprint==60.1
+xhtml2pdf==0.2.11
