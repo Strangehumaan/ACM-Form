@@ -66,16 +66,24 @@ def submit_form():
                 sheet.insert_row(headers, 1)
 
             sheet.append_row(row_data)
-            generate_and_send_badge(name, member_id, email)
+            
+            # Try to send email but don't block success page if it fails
+            try:
+                generate_and_send_badge(name, member_id, email)
+                print(f"✅ Badge email sent successfully to {email}")
+            except Exception as email_error:
+                print(f"⚠️  Warning: Failed to send badge email: {email_error}")
+                # Continue to success page even if email fails
+            
             return render_template("success.html", name=name)
         else:
             flash("Error submitting form. Could not access Google Sheet.", "error")
+            return redirect(url_for("index"))
 
     except Exception as e:
         print(f"Error submitting form: {e}")
         flash("Error submitting form. Please try again.", "error")
-
-    return redirect(url_for("index"))
+        return redirect(url_for("index"))
 
 @app.route("/success")
 def success():

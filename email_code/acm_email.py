@@ -10,6 +10,7 @@ import os
 from datetime import datetime
 import io
 import base64
+from weasyprint import HTML
 
 class ACMBadgeGenerator:
     def __init__(self):
@@ -80,6 +81,23 @@ class ACMBadgeGenerator:
             print(f"❌ An error occurred while creating the HTML badge: {e}")
             return None
 
+    def convert_html_to_pdf(self, html_content):
+        """
+        Converts HTML content to PDF bytes.
+        
+        Args:
+            html_content (str): The HTML content to convert.
+        
+        Returns:
+            bytes: The PDF content as bytes, or None if conversion fails.
+        """
+        try:
+            pdf_bytes = HTML(string=html_content).write_pdf()
+            return pdf_bytes
+        except Exception as e:
+            print(f"❌ Error converting HTML to PDF: {e}")
+            return None
+
     def create_professional_email_template(self, name, member_id, join_date=None):
         """Create a sleek HTML email template"""
         if join_date is None:
@@ -139,7 +157,7 @@ class ACMBadgeGenerator:
                             🎫 Your Digital Badge
                         </h3>
                         <p style="margin: 0; color: #e6f3ff; line-height: 1.6;">
-                            Your personalized HTML membership badge is attached. Download and open it in a browser to view and save it.
+                            Your personalized membership badge is attached as a PDF. Download and save it for your records.
                         </p>
                     </div>
                 </div>
@@ -155,7 +173,7 @@ class ACMBadgeGenerator:
 
     def send_professional_email(self, recipient_email, name, member_id, badge_html_content):
         """
-        Sends the professional email with the generated HTML badge as an attachment.
+        Sends the professional email with the generated badge as a PDF attachment.
         """
         try:
             msg = MIMEMultipart('related')
@@ -176,15 +194,22 @@ class ACMBadgeGenerator:
             except FileNotFoundError:
                 print("⚠️  ACM logo (acm.png) not found for email template. It will be missing from the email.")
             
-            # Attach the generated HTML badge as a file
-            badge_attachment = MIMEBase('application', 'octet-stream')
-            badge_attachment.set_payload(badge_html_content.encode('utf-8'))
-            encoders.encode_base64(badge_attachment)
-            badge_attachment.add_header(
-                'Content-Disposition',
-                f'attachment; filename="ACM_Membership_Badge_{member_id}.html"'
-            )
-            msg.attach(badge_attachment)
+            # Convert HTML badge to PDF and attach it
+            print("📄 Converting badge to PDF...")
+            pdf_bytes = self.convert_html_to_pdf(badge_html_content)
+            
+            if pdf_bytes:
+                badge_attachment = MIMEBase('application', 'pdf')
+                badge_attachment.set_payload(pdf_bytes)
+                encoders.encode_base64(badge_attachment)
+                badge_attachment.add_header(
+                    'Content-Disposition',
+                    f'attachment; filename="ACM_Membership_Badge_{member_id}.pdf"'
+                )
+                msg.attach(badge_attachment)
+                print("✅ PDF badge attached successfully")
+            else:
+                print("⚠️  Warning: Could not convert badge to PDF, skipping attachment")
             
             # Send the email
             with smtplib.SMTP(self.smtp_config['server'], self.smtp_config['port']) as server:
@@ -208,7 +233,8 @@ def generate_and_send_badge(name: str, member_id: str, recipient_email: str) -> 
     This function orchestrates the entire process:
     1. Instantiates the badge generator.
     2. Creates the HTML badge content.
-    3. Sends the badge as an attachment in a professional email.
+    3. Converts the HTML badge to PDF.
+    4. Sends the badge as a PDF attachment in a professional email.
 
     Args:
         name (str): The full name of the member.
@@ -237,7 +263,7 @@ def generate_and_send_badge(name: str, member_id: str, recipient_email: str) -> 
     
     if success:
         print(f"✅ Email sent successfully to {recipient_email}")
-        print(f"📎 Badge attached as: ACM_Membership_Badge_{member_id}.html")
+        print(f"📎 Badge attached as: ACM_Membership_Badge_{member_id}.pdf")
     else:
         print("❌ Failed to send email. Please check the console for errors.")
         
