@@ -72,8 +72,13 @@
 - Updated email body text to mention PDF instead of HTML
 
 **Files Modified:**
-- `requirements.txt` (added weasyprint)
-- `email_code/acm_email.py` (lines 13, 84-99, 173-223, 265-266)
+- `requirements.txt` (added xhtml2pdf instead of weasyprint for better Render compatibility)
+- `email_code/acm_email.py` (lines 13, 84-116, 173-223, 265-266)
+
+**Note:** Initially used weasyprint but switched to xhtml2pdf (pisa) because:
+- xhtml2pdf is pure Python with no system dependencies
+- Better compatibility with Render's hosting environment
+- Faster conversion and no worker timeout issues
 
 ---
 
@@ -91,13 +96,8 @@ The changes are compatible with your existing Render deployment. Make sure to:
 2. Render will automatically detect the updated `requirements.txt` and install weasyprint
 3. No additional configuration needed
 
-### System Dependencies for WeasyPrint:
-WeasyPrint requires some system libraries. On Ubuntu/Debian:
-```bash
-sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0
-```
-
-On Render, these are typically already available, but if you encounter issues, you may need to add a build script.
+### System Dependencies:
+The updated version uses `xhtml2pdf` (pisa) which is a pure Python library and requires no system dependencies. This makes it perfect for Render deployment with no additional configuration needed.
 
 ---
 
